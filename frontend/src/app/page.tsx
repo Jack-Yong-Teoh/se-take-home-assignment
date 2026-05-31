@@ -30,6 +30,7 @@ const insertPendingOrder = (
   const nextOrder = ordersById[orderId];
   const nextPriority = getPriority(nextOrder.type);
 
+  // Find the index to insert the new order ID based on priority and id for tie-breaking
   const insertIndex = nextPending.findIndex((existingOrderId) => {
     const existingOrder = ordersById[existingOrderId];
     const existingPriority = getPriority(existingOrder.type);
@@ -51,6 +52,7 @@ const insertPendingOrder = (
     nextPending.splice(insertIndex, 0, orderId);
   }
 
+  // this return the new pending order ids array with the new order id inserted at the correct position based on priority and id
   return nextPending;
 };
 
@@ -75,6 +77,7 @@ const assignIdleBots = (state: OrderState, now: number): OrderState => {
       continue;
     }
 
+    // Remove and get the first pending order ID
     const orderId = pendingOrderIds.shift();
 
     if (orderId === undefined) {
@@ -83,6 +86,7 @@ const assignIdleBots = (state: OrderState, now: number): OrderState => {
 
     const order = ordersById[orderId];
 
+    // Replace the order with an updated status and startedAt
     ordersById[orderId] = {
       ...order,
       status: "PROCESSING",
@@ -254,6 +258,7 @@ const Home = () => {
   const [now, setNow] = useState<number | null>(null);
   const timersRef = useRef<Record<number, number>>({});
 
+  // Set up an interval to update the current time every second (UI purposes)
   useEffect(() => {
     setNow(Date.now());
 
@@ -266,6 +271,7 @@ const Home = () => {
     };
   }, []);
 
+  // Set up timers for bots that are working on orders to automatically complete them after the processing duration
   useEffect(() => {
     const activeBotIds = new Set(
       state.bots
@@ -309,6 +315,7 @@ const Home = () => {
     }
   }, [state.bots, now]);
 
+  // Clean up timers on unmount
   useEffect(() => {
     return () => {
       for (const timerId of Object.values(timersRef.current)) {
